@@ -88,6 +88,18 @@ export interface StoreState {
   setSavedSearches: (s: string[]) => void
   multiSigMode: boolean
   setMultiSigMode: (v: boolean) => void
+
+  // Template state (#148)
+  selectedTemplateId: string | null
+  setSelectedTemplateId: (id: string | null) => void
+
+  // Preferences panel (#142)
+  preferencesOpen: boolean
+  setPreferencesOpen: (open: boolean) => void
+
+  // Error state (#144)
+  globalError: { message: string; category: string } | null
+  setGlobalError: (err: { message: string; category: string } | null) => void
 }
 
 // ─── Persisted keys ───────────────────────────────────────────────────────────
@@ -198,6 +210,18 @@ export const useStore = create<StoreState>((set, get) => ({
   setSavedSearches: (s) => set({ savedSearches: s }),
   multiSigMode: false,
   setMultiSigMode: (v) => set({ multiSigMode: v }),
+
+  // Template state (#148)
+  selectedTemplateId: null,
+  setSelectedTemplateId: (id) => set({ selectedTemplateId: id }),
+
+  // Preferences panel (#142)
+  preferencesOpen: false,
+  setPreferencesOpen: (open) => set({ preferencesOpen: open }),
+
+  // Error state (#144)
+  globalError: null,
+  setGlobalError: (err) => set({ globalError: err }),
 }))
 
 // ─── Persistence middleware ───────────────────────────────────────────────────

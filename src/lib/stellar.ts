@@ -2,6 +2,7 @@ import * as StellarSdk from '@stellar/stellar-sdk'
 import { Cache, TTL } from './cache.js'
 import { rateLimiter } from './rateLimiter.js'
 import auditTrail from './auditTrail.js'
+import { getCircuitBreaker } from './errorHandling/CircuitBreaker'
 
 // ─── Cache setup ──────────────────────────────────────────────────────────────
 
@@ -138,8 +139,9 @@ export async function fetchAccount(
   const cached = stellarCache.get(cacheKey)
   if (cached) return cached
 
+  const breaker = getCircuitBreaker(`horizon:${network}`, { failureThreshold: 5, timeout: 30_000 })
   const server = getServer(network)
-  const account = await server.loadAccount(publicKey)
+  const account = await breaker.execute(() => server.loadAccount(publicKey))
   stellarCache.set(cacheKey, account, TTL.ACCOUNT, ['account', publicKey])
   return account
 }
@@ -322,11 +324,14 @@ export async function fetchNetworkStats(network: NetworkName = 'testnet'): Promi
   const cached = stellarCache.get(cacheKey)
   if (cached) return cached
 
+  const breaker = getCircuitBreaker(`horizon:${network}`, { failureThreshold: 5, timeout: 30_000 })
   const server = getServer(network)
-  const [ledger, feeStats] = await Promise.all([
-    server.ledgers().order('desc').limit(1).call(),
-    server.feeStats(),
-  ])
+  const [ledger, feeStats] = await breaker.execute(() =>
+    Promise.all([
+      server.ledgers().order('desc').limit(1).call(),
+      server.feeStats(),
+    ])
+  )
   const result = {
     latestLedger: ledger.records[0],
     feeStats,

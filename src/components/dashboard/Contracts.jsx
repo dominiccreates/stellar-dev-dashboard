@@ -14,6 +14,7 @@ import {
   getContractTemplates,
   simulateSorobanTests,
 } from '../../lib/contractDevelopment'
+import TemplateLibrary from '../templates/TemplateLibrary'
 
 const ARGUMENT_TYPES = [
   { value: 'string', label: 'String' },
@@ -310,10 +311,28 @@ export default function Contracts() {
     <div className="animate-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700 }}>Soroban Contracts</div>
       <div style={{ display: 'flex', gap: '8px' }}>
-        <button onClick={() => setMode('inspect')}>Inspect & Invoke</button>
-        <button onClick={() => setMode('deploy')}>Deploy</button>
+        {['inspect', 'deploy', 'templates'].map((m) => (
+          <button
+            key={m}
+            onClick={() => setMode(m)}
+            style={{
+              padding: '7px 14px',
+              background: mode === m ? 'var(--cyan-glow)' : 'transparent',
+              border: `1px solid ${mode === m ? 'var(--cyan-dim)' : 'var(--border)'}`,
+              borderRadius: 'var(--radius-sm)',
+              color: mode === m ? 'var(--cyan)' : 'var(--text-secondary)',
+              fontSize: '12px',
+              fontFamily: 'var(--font-mono)',
+              cursor: 'pointer',
+              textTransform: 'capitalize',
+            }}
+          >
+            {m === 'inspect' ? 'Inspect & Invoke' : m === 'deploy' ? 'Deploy' : '📚 Templates'}
+          </button>
+        ))}
       </div>
       {mode === 'deploy' && <ContractDeployerView />}
+      {mode === 'templates' && <TemplateLibrary />}
 
       <Panel
         title="Development Suite"

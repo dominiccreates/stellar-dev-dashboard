@@ -1,6 +1,7 @@
 import React, { useEffect, useState, type ComponentType, type CSSProperties } from 'react'
 import { I18nProvider } from './components/I18nProvider'
 import './i18n/index.js'
+import './styles/responsive.css'
 
 import Sidebar from './components/layout/Sidebar'
 import MobileHeader from './components/layout/MobileHeader'
@@ -52,6 +53,8 @@ import {
 } from './lib/securityEvents'
 import { TourLauncher } from './components/tutorial'
 import SearchBar from './components/layout/SearchBar'
+import UserPreferences from './components/preferences/UserPreferences'
+import MobileNavigation from './components/layout/MobileNavigation'
 
 interface SearchResult {
   type?: string
@@ -173,6 +176,8 @@ function DashboardLayout() {
     isMobileMenuOpen,
     setMobileMenuOpen,
     setActiveTab,
+    preferencesOpen,
+    setPreferencesOpen,
   } = useStore()
   const { isMobile, isTablet } = useResponsive()
   const [notificationsOpen, setNotificationsOpen] = useState<boolean>(false)
@@ -304,8 +309,31 @@ function DashboardLayout() {
         {isMobile && <MobileHeader />}
         <Sidebar isMobile={isMobile} />
         <main style={getMainStyles()}>
-          <div style={{ marginBottom: '12px' }}>
-            <SearchBar onSelectResult={handleSearchResult} />
+          <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ flex: 1 }}>
+              <SearchBar onSelectResult={handleSearchResult} />
+            </div>
+            <button
+              onClick={() => setPreferencesOpen(true)}
+              title="User Preferences"
+              style={{
+                width: '36px',
+                height: '36px',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-md)',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '16px',
+                flexShrink: 0,
+                transition: 'var(--transition)',
+              }}
+            >
+              ⚙
+            </button>
           </div>
           <div style={{ marginBottom: '16px' }}>
             <PriceTicker />
@@ -320,6 +348,25 @@ function DashboardLayout() {
           open={notificationsOpen}
           onClose={() => setNotificationsOpen(false)}
         />
+        {isMobile && <MobileNavigation />}
+        {preferencesOpen && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.5)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 1100,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+            }}
+            onClick={(e) => { if (e.target === e.currentTarget) setPreferencesOpen(false) }}
+          >
+            <UserPreferences onClose={() => setPreferencesOpen(false)} />
+          </div>
+        )}
       </div>
     </ErrorBoundary>
   )
