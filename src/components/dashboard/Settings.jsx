@@ -104,10 +104,39 @@ const styles = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Settings() {
-  const [installable, setInstallable] = useState(canInstall());
-  const [installOutcome, setInstallOutcome] = useState(null); // 'accepted' | 'dismissed'
-  const [updateReady, setUpdateReady] = useState(false);
-  const [offline, setOffline] = useState(isOffline());
+  const initialCustomHeaders = getCustomNetworkAuthHeaders();
+  const initialHeaderName = Object.keys(initialCustomHeaders)[0] || "Authorization";
+  const { network, setNetwork, theme, toggleTheme, setActiveTab } = useStore();
+  const {
+    profiles,
+    activeProfile,
+    activeProfileName,
+    setActiveProfile: setConfigProfile,
+    saveProfile,
+    deleteProfile,
+    preferences,
+    setPreference,
+  } = useSettings();
+
+  // Custom network profile state (Issue #188)
+  const [customProfiles, setCustomProfiles] = useState([]);
+  const [selectedProfileId, setSelectedProfileId] = useState(null);
+  const [profileName, setProfileName] = useState("");
+  const [horizonUrl, setHorizonUrl] = useState("");
+  const [sorobanUrl, setSorobanUrl] = useState("");
+  const [passphrase, setPassphrase] = useState("");
+  const [validationErrors, setValidationErrors] = useState({});
+  const [draftConfig, setDraftConfig] = useState(() => activeProfile.config);
+  const [apiKey, setApiKey] = useState(() => sessionStorage.getItem(SESSION_API_KEY) || "");
+  const baseline = useMemo(() => getEnvironmentConfig(), []);
+
+  // State for Alert Rules
+  const [alertRules, setAlertRules] = useState([]);
+  const [newRuleType, setNewRuleType] = useState(ALERT_RULE_TYPE.BALANCE_LOW);
+  const [newRuleThreshold, setNewRuleThreshold] = useState(0);
+  const [newRuleAssetCode, setNewRuleAssetCode] = useState("XLM");
+  const [newRuleChannel, setNewRuleChannel] = useState(ALERT_CHANNEL.EFFECTS);
+  const [newRuleAccount, setNewRuleAccount] = useState(""); // Optional: specific account for the rule
 
   // Poll canInstall every second — the beforeinstallprompt event can fire after
   // the component mounts, so we need to re-check.
@@ -327,6 +356,30 @@ export default function Settings() {
             )}
           </div>
         </div>
+      </div>
+
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+          Performance
+        </div>
+        <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+          View Core Web Vitals, bundle analysis, and performance budget violations.
+        </div>
+        <button
+          onClick={() => setActiveTab('performance')}
+          style={{
+            padding: '8px 14px',
+            borderRadius: 'var(--radius-sm)',
+            border: '1px solid var(--cyan-dim)',
+            background: 'var(--cyan-glow)',
+            color: 'var(--cyan)',
+            fontSize: '12px',
+            cursor: 'pointer',
+            alignSelf: 'flex-start',
+          }}
+        >
+          Open Performance Monitor
+        </button>
       </div>
     </div>
   );
